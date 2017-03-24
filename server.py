@@ -43,7 +43,6 @@ cList ={}
 
 # ===============================================================================
 class Server(asyncio.Protocol):
-    
     db = Database()
     db.connect()
 
@@ -52,7 +51,7 @@ class Server(asyncio.Protocol):
         peername = transport.get_extra_info("peername")
         self.username = ""
         self.addr = "{:s}:{:d}".format(*peername)
-        print("{0:s}: {1:s} connected".format(tstamp(),self.addr))
+        print("{0:s}: {1:s} connected".format(tstamp(), self.addr))
         self.send("connected")
         clients.append(self)
 
@@ -116,14 +115,13 @@ class Server(asyncio.Protocol):
 if __name__ == '__main__':
     print("{0:s} [SERVER]: starting.".format(tstamp() ))
     loop = asyncio.get_event_loop()
-    coroutine = loop.create_server(Server, '127.0.0.1', 9999)
+    coroutine = loop.create_server(Server, '192.168.1.2', 9999)
     
     server = loop.run_until_complete(coroutine)
-    asyncio.async(server_console(create_asyncio_eventloop(loop)) )
+    asyncio.async(server_console(create_asyncio_eventloop(loop)))
     for socket in server.sockets:
         print("{0:s} [SERVER]: running on {1:}".format(tstamp(),socket.getsockname()))
     try:
         loop.run_forever()
     except KeyboardInterrupt:
         pass
-    

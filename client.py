@@ -9,13 +9,19 @@ from prompt_toolkit.history import InMemoryHistory
 from prompt_toolkit.interface import CommandLineInterface
 from prompt_toolkit.shortcuts import create_prompt_application, create_asyncio_eventloop, prompt_async
 
+from chat_utils import Login, Sender, Request
+from chat_utils import toolbar_tokens
+from chat_utils import tstamp
+
+
+
 loop = asyncio.get_event_loop()
 client = []
 cmd_complete = WordCompleter(['send', 'bye','contacts'],match_middle=True, ignore_case=True) 
 
-async def client_talk(loop,coro):
+async def client_talk(loop):
     usr = await prompt_async("username:",eventloop=loop,patch_stdout=True)
-    pwd = await prompt_async("password:",eventloop=loop,patch_stdout=True,is_password=True)
+    pwd = await prompt_async("password:",eventloop=loop,patch_stdout=True, is_password=True)
     cin = usr+">"
     contacts = []
     history = InMemoryHistory()
@@ -26,10 +32,6 @@ async def client_talk(loop,coro):
             get_bottom_toolbar_tokens=toolbar_tokens),
             eventloop=loop
     )
-#     cli = create_prompt_application(
-#             cin,history=history,
-#             completer=cmd_complete,
-#             get_bottom_toolbar_tokens=toolbar_tokens,patch_stdout=True)
 
     sys.stdout = cli.stdout_proxy()
     client[0].send(Login(usr,pwd) )
@@ -93,9 +95,9 @@ class Client(asyncio.Protocol):
 def main():
     loop = asyncio.get_event_loop()
     try:
-        coro = loop.create_connection(Client,'192.168.1.2', 9999)
-        loop.run_until_complete(coro)
-        asyncio.async(client_talk(create_asyncio_eventloop(loop),coro) )
+        couroutine = loop.create_connection(Client,'192.168.1.2', 9999)
+        loop.run_until_complete(couroutine)
+        asyncio.async(client_talk(create_asyncio_eventloop(loop),couroutine))
     except ConnectionRefusedError:
         sys.stderr.write("Error connecting.\nQuitting.\n")
         return
