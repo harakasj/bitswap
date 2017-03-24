@@ -4,14 +4,15 @@ import asyncio
 import sys
 from pickle import loads
 
-from chat_utils import Login, Sender, Request
-from chat_utils import toolbar_tokens
-from chat_utils import tstamp
-from database import Database
 from prompt_toolkit.contrib.completers import WordCompleter
 from prompt_toolkit.history import InMemoryHistory
 from prompt_toolkit.interface import CommandLineInterface
 from prompt_toolkit.shortcuts import create_prompt_application, create_asyncio_eventloop
+
+from chat_utils import Login, Sender, Request
+from chat_utils import toolbar_tokens
+from chat_utils import tstamp
+from database import Database
 
 cmd_complete = WordCompleter(['/send', '/bye'], ignore_case=True)
 sql_completer = WordCompleter(['create', 'select', 'insert', 'drop',
