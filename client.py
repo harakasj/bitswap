@@ -13,29 +13,28 @@ from chat_utils import Login, Sender, Request
 from chat_utils import toolbar_tokens
 from chat_utils import tstamp
 
-
-
 loop = asyncio.get_event_loop()
 client = []
-cmd_complete = WordCompleter(['send', 'bye','contacts'],match_middle=True, ignore_case=True) 
+cmd_complete = WordCompleter(['send', 'bye', 'contacts'], match_middle=True, ignore_case=True)
+
 
 async def client_talk(loop):
-    usr = await prompt_async("username:",eventloop=loop,patch_stdout=True)
-    pwd = await prompt_async("password:",eventloop=loop,patch_stdout=True, is_password=True)
-    cin = usr+">"
+    usr = await prompt_async("username:", eventloop=loop, patch_stdout=True)
+    pwd = await prompt_async("password:", eventloop=loop, patch_stdout=True, is_password=True)
+    cin = usr + ">"
     contacts = []
     history = InMemoryHistory()
     cli = CommandLineInterface(
-            application=create_prompt_application(
-            cin,history=history,
+        application=create_prompt_application(
+            cin, history=history,
             completer=cmd_complete,
             get_bottom_toolbar_tokens=toolbar_tokens),
-            eventloop=loop
+        eventloop=loop
     )
 
     sys.stdout = cli.stdout_proxy()
-    client[0].send(Login(usr,pwd) )
-    cin = usr+">"
+    client[0].send(Login(usr, pwd))
+    cin = usr + ">"
 
     while True:
         try:
@@ -43,40 +42,38 @@ async def client_talk(loop):
             sys.stdout.flush()
             msg = msg.text
             try:
-                if msg.startswith("/"): 
+                if msg.startswith("/"):
                     msg = msg.split(sep="/")
-                    if msg[1] == "bye": client[0].close_conn()
-                    
+                    if msg[1] == "bye":
+                        client[0].close_conn()
+
                     elif msg[1] == "contacts":
-                        client[0].send(Request("contacts",usr) )
+                        client[0].send(Request("contacts", usr))
 
                     elif msg[1] == "send":
-                        client[0].send(Sender(msg[2],msg[3]) )
-                        print("{0:s} [{1:s}]: {2:s}\n".format(tstamp() ,usr,msg[3])  )
+                        client[0].send(Sender(msg[2], msg[3]))
+                        print("{0:s} [{1:s}]: {2:s}\n".format(tstamp(), usr, msg[3]))
                     else:
                         raise IndexError
             except IndexError:
                 print("Not understood.")
                 continue
-            
+
         except (EOFError, KeyboardInterrupt):
             return
-
 
 
 class Client(asyncio.Protocol):
     def __init__(self):
         self.loop = loop
         client.append(self)
-        
-        
+
     def connection_made(self, transport):
         print('CONNECT')
         self.transport = transport
-        
 
     def data_received(self, data):
-        print('{}'.format(data.decode('utf-8')) )
+        print('{}'.format(data.decode('utf-8')))
 
     def connection_lost(self, exc):
         print('The server closed the connection')
@@ -86,18 +83,17 @@ class Client(asyncio.Protocol):
     def close_conn(self):
         self.loop.stop()
 
-    def send(self,data):
+    # sends pickled data
+    def send(self, data):
         self.transport.write(dumps(data))
-    
-    def get_contacts(self,user):
-        self.send(Request("contacts",user))
-        
+
+
 def main():
     loop = asyncio.get_event_loop()
     try:
-        couroutine = loop.create_connection(Client,'192.168.1.2', 9999)
+        couroutine = loop.create_connection(Client, '192.168.1.2', 9999)
         loop.run_until_complete(couroutine)
-        asyncio.async(client_talk(create_asyncio_eventloop(loop),couroutine))
+        asyncio.async(client_talk(create_asyncio_eventloop(loop), couroutine))
     except ConnectionRefusedError:
         sys.stderr.write("Error connecting.\nQuitting.\n")
         return
@@ -106,6 +102,7 @@ def main():
     except KeyboardInterrupt:
         pass
     loop.close()
+
+
 if __name__ == "__main__":
     main()
-
