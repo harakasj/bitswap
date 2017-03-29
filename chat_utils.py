@@ -31,9 +31,9 @@ def tstamp():
 
 
 Connect = namedtuple("Connection", "addr port")
-# Login    = namedtuple("Login", "username pwd")
-Login = namedtuple("Login", "action username pwd")
-
+Login = namedtuple("Login", "username pwd")
+# Login = namedtuple("Login", "action username pwd")
+Message = namedtuple("Message", "rcv msg")
 Sender = namedtuple("Sender", "rcv msg")
 Request = namedtuple("Request", "req args")
 
