@@ -27,7 +27,7 @@ from chat_utils import tstamp
 from database import Database
 
 
-# All this stuff, I wouldn't worry about, it's just a shitty command-line interface used for debugging stuff
+# don't worry about whats below, it's just a shitty command-line interface used for debugging stuff
 # =============================== BEGIN NOT WORRYING ===================================================================
 cmd_complete = WordCompleter(['/send', '/bye'], ignore_case=True)
 sql_completer = WordCompleter(['create', 'select', 'insert', 'drop',
@@ -53,8 +53,15 @@ async def server_console(loop):
             return
 # ================================= END NOT WORRYING ===================================================================
 
-clients = []
-cList ={}
+
+Login = namedtuple("Login", "action user pwd")
+Request = namedtuple("Request", "action user contact group")
+Message = namedtuple("Message", "tstamp sender recv msg")
+Status = namedtuple("Status", "user status")
+
+clients = []    # keep a list of connections.
+cList = {}      # user connections are added to a dictionary, and looked up by username
+clientSession = {}
 
 
 """
@@ -108,11 +115,12 @@ class Server(asyncio.Protocol):
     def connection_lost(self, ex):
         print("{0:s} connection lost: {1:s}".format(tstamp(),self.username) )
         clients.remove(self)
-        del cList[self.username]
+        # del cList[self.username]
+        del clientSession[self.username]
 
         # Fix this, only broadcast a user disconnected to someone chatting
         # Right now, message is sent to all clients connected.
-        for client in clients:
+        for client in clients:  #FIXME
             client.send("{:s} disconnected".format(self.username))
 
 
@@ -129,22 +137,44 @@ class Server(asyncio.Protocol):
     def send_bin(self,data):
         self.transport.write_object(data)
 
-    def handle_message(self,data):
-        cList[data.rcv].send(data.msg,self.username)
+    def handle_message(self,message):
+        # cList[data.rcv].send(data.msg,self.username)
+        clientSession[message.recv].send(message.msg,self.username)
         pass
      
-    def handle_login(self,data):
-        auth = self.db.check_login(data.username, data.pwd)
+    def handle_login(self,login):
+        auth = self.db.check_login(login.user, login.pwd)
         self.send("Logged in.\n")
-        self.username = data.username
-        cList[data.username] = self
+        self.username = login.user
+        clientSession[login.user] = self
 
-    def handle_request(self,data):
+    def handle_request(self,request):
         print(data)
-        if data.req == "contacts":
+        if request.action is 'Add':
+            self.send("Echo: Add")
+            self.send(request)
+            pass
+
+        if request.action is 'Update':
+            self.send("Echo: Update")
+            self.send(request)
+            pass
+
+        if request.action is 'Delete':
+            self.send("Echo: Delete")
+            self.send(request)
+            pass
+
+        if request.action is 'Block':
+            self.send("Echo: Block")
+            self.send(request)
+            pass
+
+        if request.action == "contacts":
             contacts= self.db.query_contact(self.username)
             print("{0:s} [SERVER]: contacts for: {1:}".format(tstamp(),self.username))
             print(*tuple(contacts[i] for i in range(len(contacts))), sep="\n")
+
 
             # Get all the contacts, and send them over the socket one at a time
             # This can be done another way in bulk, but it is easier to send them one and display it in terminal
