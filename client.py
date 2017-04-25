@@ -48,6 +48,7 @@ The query returns true or false depending on if the login information is found.
 from __future__ import unicode_literals
 
 import asyncio
+import io
 import sys
 from pickle import dumps
 
@@ -57,12 +58,12 @@ from prompt_toolkit.history import InMemoryHistory
 from prompt_toolkit.interface import CommandLineInterface
 from prompt_toolkit.shortcuts import create_prompt_application, create_asyncio_eventloop, prompt_async
 
-
+from chat_utils import Login, Request, Message
 # These are some imports specific to the client-server.
-from chat_utils import Login, Sender, Request, Message      # import the tuples that we use for communication
+# from chat_utils import Login, Request, Message      # import the tuples that we use for communication
 from chat_utils import toolbar_tokens
 from chat_utils import tstamp
-
+io.StringIO
 loop = asyncio.get_event_loop()
 client = []
 cmd_complete = WordCompleter(['send', 'bye', 'contacts'], match_middle=True, ignore_case=True)
@@ -97,10 +98,10 @@ async def client_talk(loop):
                         client[0].close_conn()
 
                     elif msg[1] == "contacts":
-                        client[0].send(Request("contacts", usr))
+                        client[0].send(Request("contacts", usr,None,None))
 
                     elif msg[1] == "send":
-                        client[0].send(Message(msg[2], msg[3]))
+                        client[0].send(Message(tstamp(),usr,msg[2], msg[3]))
                         print("{0:s} [{1:s}]: {2:s}\n".format(tstamp(), usr, msg[3]))
                     else:
                         raise IndexError

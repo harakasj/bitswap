@@ -1,5 +1,12 @@
 import time
+
 import pymysql
+
+# Insert = "'INSERT INTO `%s`.`%s` (`contact`,`users_contact`) VALUES ('%s','%s');"
+#
+Group = "'INSERT INTO `%s`.`%s` (`contact`,`group`,`users_contact`) VALUES ('%s','%s','%s');"
+
+# Insert = "'INSERT INTO `%s`.`%s` (`contact`,`group`,`users_contact`) VALUES (%s,%s,%s);"
 
 def tstamp():
     return time.strftime("%H:%M:%S", time.gmtime())
@@ -19,12 +26,12 @@ Make database credentials protected variables
 """
 
 
-class Database():
+class Database(object):
     sys_user = ""
     sys_pwd = ""
-    schema = "dbchat"
-    # addr = ""
-    user_t = "users"
+    schema = "test2"
+    addr = "192.168.1.3"
+    user_t =  "users"
     is_connected = False
 
     def connect(self):
@@ -65,8 +72,8 @@ class Database():
         
         Query contacts for a user and a group they are in (if any) and returns list tuple of (contact, group)
         """
-        q = ("select contact, `group` from ("
-             "%(0)s.contact join %(0)s.users  on username = users_contact )"
+        q = ("select contact, `cgroup` from ("
+             "%(0)s.contacts join %(0)s.users  on username = cuser )"
              " where username = '%(1)s';" % {"0": self.schema, "1": user})
         # print(q)
         print("%s [DATABASE]: Querying contacts for %s." % (tstamp(), user))
@@ -138,3 +145,44 @@ def testrun():
 
     # Uncomment this if you wanna run some tests
     # testrun()
+
+# Insert = "INSERT INTO `test2`.`contacts` (`cuser`,`contact`,`cgroup`) VALUES ('%s','%s','%s');"
+#
+# Delete = "DELETE FROM `test2`.`contacts` WHERE `cuser`='%s' and contact='%s';"
+#
+# Update = "UPDATE `test2`.`contacts` SET `cgroup` = '%s' WHERE contact='%s' and cgroup='%s';"
+#
+#
+# Login = namedtuple("Login", "action user pwd")
+# Request = namedtuple("Request", "action user contact group")
+# Message = namedtuple("Message", "tstamp sender recv msg")
+# Status = namedtuple("Status", "user status")
+#
+# user_login = Login(action='logon', user='john', pwd='Password123')
+# user_logoff = Login(action='logoff', user='john', pwd=None)
+#
+# user_status = Status(user='john', status='online')
+# user_msg = Message(tstamp=tstamp(), sender='john', recv='joe', msg='Hey how are you doing today?')
+#
+# contact_add = Request(action='Delete', user='john', contact='joe', group=None)
+# contact_del = Request(action='Delete', user='john', contact='joe', group=None)
+#
+# group_add = Request(action='Add', user='john', contact=None, group='friends')
+# group_del = Request(action='Delete', user='john', contact=None, group='friends')
+# contact_group_del = Request(action='Delete', user='john', contact='joe', group='friends')
+#
+#
+#
+#
+# # print(Insert)
+# # print(Insert % ('a','b','c','d'))
+# r  = Request('Add',"'john'",None,"'friends'")
+# # user_add = Request('Add','john'","'joe'","'friends'")
+# # user_del = Request('Delete',"'john'","'joe'","'friends'")
+# # group_del =Request('Delete',"'john'","'joe'","'friends'")
+# # print(Insert % (r.user, r.contact, ("NULL" if r.group is None else r.group)))
+#
+#
+# print(Insert % (r.user,("NULL" if r.contact is None else r.contact), ("NULL" if r.group is None else r.group)))
+#
+# print(Insert % (r.user,("NULL" if r.contact is None else r.contact), ("NULL" if r.group is None else r.group)))

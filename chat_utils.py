@@ -29,11 +29,15 @@ def toolbar_tokens(cli):
 def tstamp():
     return strftime("%H:%M:%S", gmtime())
 
+Login = namedtuple("Login", "user pwd")
+Request = namedtuple("Request", "action user contact group")
+Message = namedtuple("Message", "tstamp sender recv msg")
+Status = namedtuple("Status", "user status")
 
-Connect = namedtuple("Connection", "addr port")
-Login = namedtuple("Login", "username pwd")
+# Connect = namedtuple("Connection", "addr port")
+# Login = namedtuple("Login", "username pwd")
 # Login = namedtuple("Login", "action username pwd")
-Message = namedtuple("Message", "rcv msg")
-Sender = namedtuple("Sender", "rcv msg")
-Request = namedtuple("Request", "req args")
-
+# Message = namedtuple("Message", "rcv msg")
+# Sender = namedtuple("Sender", "rcv msg")
+# Request = namedtuple("Request", "req args")
+# Request = namedtuple("Request", "action user group group_name")
